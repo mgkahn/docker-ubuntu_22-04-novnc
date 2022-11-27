@@ -1,11 +1,10 @@
-.PHONY: build manifest buildfat check run debug push save clean clobber
+.PHONY: build buildx buildx-from-scratch from-scratch manifest buildfat check run debug push save clean clobber
 
 # Default values for variables
 REPO  ?= fredblgr/
 NAME  ?= ubuntu-novnc
 TAG   ?= 22.04
 ARCH  := $$(arch=$$(uname -m); if [[ $$arch == "x86_64" ]]; then echo amd64; else echo $$arch; fi)
-RESOL   = 1440x900
 ARCHS = amd64 arm64
 IMAGES := $(ARCHS:%=$(REPO)$(NAME):$(TAG)-%)
 PLATFORMS := $$(first="True"; for a in $(ARCHS); do if [[ $$first == "True" ]]; then printf "linux/%s" $$a; first="False"; else printf ",linux/%s" $$a; fi; done)
@@ -21,7 +20,13 @@ build: $(templates)
 	  docker rmi $$(docker images --filter "dangling=true" -q); \
 	fi
 
-from-scratch: $(templates) yarnpkg_pubkey.gpg
+buildx: $(templates)
+	docker buildx build --push --platform linux/amd64,linux/arm64 --tag mgkahn/ubuntu_22_04:latest .
+
+buildx-from-scratch: $(templates)
+	docker buildx build --no-cache --push --platform linux/amd64,linux/arm64 --tag mgkahn/ubuntu_22_04:latest .
+
+from-scratch: $(templates) 
 	docker build --no-cache --pull --tag $(REPO)$(NAME):$(TAG)-$(ARCH) .
 	@danglingimages=$$(docker images --filter "dangling=true" -q); \
 	if [[ $$danglingimages != "" ]]; then \

@@ -41,8 +41,9 @@ RUN wget https://github.com/krallin/tini/archive/v0.19.0.tar.gz \
  && cd ..; rm -r tini-0.19.0 v0.19.0.tar.gz
 
 
+# mgk: Removed NextCloud from build
 # NextCloud
-RUN apt-get update && apt-get install -y nextcloud-desktop
+#RUN apt-get update && apt-get install -y nextcloud-desktop
 
 # Firefox with apt, not snap (which does not run in the container)
 COPY mozilla-firefox_aptprefs.txt /etc/apt/preferences.d/mozilla-firefox
